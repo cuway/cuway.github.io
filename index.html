@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuway</title>
+    <!-- Script tạo Favicon động (Loading xoay vòng) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            let angle = 0;
+            
+            let link = document.querySelector("link[rel*='icon']");
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.head.appendChild(link);
+            }
+
+            let faviconInterval;
+
+            function updateFavicon() {
+                ctx.clearRect(0, 0, 32, 32);
+                
+                // Vẽ vòng tròn nền
+                ctx.beginPath();
+                ctx.arc(16, 16, 12, 0, 2 * Math.PI);
+                ctx.strokeStyle = 'rgba(255, 182, 193, 0.2)';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Vẽ vòng quay (màu hồng sáng)
+                ctx.beginPath();
+                ctx.arc(16, 16, 12, angle, angle + Math.PI * 0.7);
+                ctx.strokeStyle = '#ffdae0';
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                link.href = canvas.toDataURL('image/png');
+                angle += 0.3;
+            }
+            // Hiệu ứng gõ chữ cho tiêu đề tab (Tab Title)
+            const titleText = "Cuway";
+            let titleIndex = 0;
+            let titleDirection = 1;
+            let titlePause = 0;
+
+            function updateTitle() {
+                if (titlePause > 0) {
+                    titlePause--;
+                    return;
+                }
+                if (titleDirection === 1) {
+                    titleIndex++;
+                    if (titleIndex === titleText.length) {
+                        titlePause = 15; // Dừng một lúc khi gõ xong
+                        titleDirection = -1;
+                    }
+                } else {
+                    titleIndex--;
+                    if (titleIndex === 0) {
+                        titlePause = 5; // Dừng một lúc khi xóa hết
+                        titleDirection = 1;
+                    }
+                }
+                document.title = titleText.substring(0, titleIndex) + (titleIndex < titleText.length ? "_" : "");
+            }
+
+            // Bắt đầu xoay Favicon
+            faviconInterval = setInterval(updateFavicon, 80);
+
+            // Tạm dừng xoay Favicon và Typewriter khi qua tab khác để tiết kiệm tài nguyên
+            let titleIntervalId = setInterval(updateTitle, 300);
+            document.addEventListener("visibilitychange", () => {
+                if (document.hidden) {
+                    clearInterval(faviconInterval);
+                    clearInterval(titleIntervalId);
+                } else {
+                    faviconInterval = setInterval(updateFavicon, 80);
+                    titleIntervalId = setInterval(updateTitle, 300);
+                }
+            });
+
+            // Lấy thông tin thời tiết Cần Thơ (Cập nhật ngầm ngay khi tải trang)
+            fetch('https://api.open-meteo.com/v1/forecast?latitude=10.0452&longitude=105.7469&current_weather=true')
+                .then(res => res.json())
+                .then(data => {
+                    const temp = Math.round(data.current_weather.temperature);
+                    const code = data.current_weather.weathercode;
+                    let icon = '🌤️'; // Mặc định
+                    
+                    // Mã hóa thời tiết sang Emoji
+                    if (code === 0) icon = '☀️'; // Trời quang
+                    else if (code >= 1 && code <= 3) icon = '⛅'; // Có mây
+                    else if (code === 45 || code === 48) icon = '🌫️'; // Sương mù
+                    else if (code >= 51 && code <= 67) icon = '🌧️'; // Mưa
+                    else if (code >= 71 && code <= 77) icon = '❄️'; // Tuyết
+                    else if (code >= 95) icon = '⛈️'; // Bão sấm sét
+                    
+                    document.getElementById('weather-info').innerHTML = `${temp}°C ${icon}`;
+                })
+                .catch(err => {
+                    document.getElementById('weather-info').style.display = 'none'; // Ẩn đi nếu lỗi mạng
+                });
+            // Xác định thiết bị (Mobile hay PC)
+            const isMobile = window.innerWidth <= 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            
+            const bgVideo = document.getElementById('bg-video');
+            const bgAudio = document.getElementById('bg-audio');
+            
+            if (bgVideo && bgAudio) {
+                if (isMobile) {
+                    // Nền cố định cho Mobile (đã qua xử lý siêu nét Unsharp Mask)
+                    bgVideo.src = `mobile_video_sharp.mp4`;
+                    bgAudio.src = `mobile_audio_loop.m4a`;
+                } else {
+                    // Randomize background video Charlie Puth cho PC
+                    const totalVideos = 3;
+                    const randomId = Math.floor(Math.random() * totalVideos) + 1;
+                    
+                    bgVideo.src = `cp_${randomId}_video.mp4`;
+                    bgAudio.src = `cp_${randomId}_audio.m4a`;
+                }
+                
+                bgVideo.load();
+                bgAudio.load();
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Con trỏ chuột Custom -->
+    <div class="cursor-dot"></div>
+
+    <!-- Màn hình chờ giúp trình duyệt cho phép phát âm thanh -->
+    <div id="enter-screen" onclick="enterSite()">
+        <p>click to fuck me</p>
+    </div>
+
+    <!-- Background Video & Audio -->
+    <video id="bg-video" loop muted playsinline preload="auto" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -1; opacity: 0; transition: opacity 1.5s ease-in-out; background-color: #000;"></video>
+    <audio id="bg-audio" loop preload="auto"></audio>
+
+    <div class="main-content">
+        <!-- Avatar -->
+        <div class="avatar-container">
+            <img src="avatar.jpg" onerror="this.src='https://ui-avatars.com/api/?name=Cuway&background=ffdae0&color=fff&size=120&rounded=true'" alt="Avatar" id="profile-avatar">
+        </div>
+
+        <!-- Tên và Bio -->
+        <h1 class="name"><span class="sway-wrapper glitch-text" id="name-scramble" data-text="Dinh Trong">Dinh Trong</span></h1>
+        <!-- Tiểu sử có hiệu ứng gõ chữ -->
+        <div class="bio">
+            <div style="position: relative; display: inline-block; visibility: hidden;">
+                cầu cho cha mẹ đóng lời dùm con<span style="margin-left: 2px;">|</span>
+                <div style="position: absolute; left: 0; top: 0; visibility: visible; display: flex; white-space: nowrap;">
+                    <span id="typewriter-text"></span><span class="cursor-blink">|</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vị trí & Thời tiết -->
+        <div class="location">
+            <a href="https://maps.app.goo.gl/R4LFsugKjp6uoMUs6" target="_blank" style="color: inherit; text-decoration: none; cursor: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fas fa-map-marker-alt"></i> Cần Thơ
+                <span id="weather-info" style="font-size: 0.85em; opacity: 0.9; padding-left: 8px; border-left: 1.5px solid rgba(255, 218, 224, 0.4);"><i class="fas fa-spinner fa-spin"></i></span>
+            </a>
+        </div>
+
+
+        <!-- Các icon mạng xã hội (Đưa xuống dưới) -->
+        <div class="socials">
+            <a href="https://www.facebook.com/milf.boiz/?locale=vi_VN" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://t.me/cuway_agent" target="_blank"><i class="fab fa-telegram"></i></a>
+            <a href="https://discord.gg/4TTvmjERp6" target="_blank"><i class="fab fa-discord"></i></a>
+        </div>
+
+        <!-- Skills -->
+        <div class="skills">
+            <div class="skill-badge"><i class="fas fa-robot"></i> AI Usage</div>
+            <div class="skill-badge"><i class="fas fa-search"></i> Research</div>
+        </div>
+        <!-- Lượt xem (Đưa vào giữa) -->
+        <div class="view-count" id="view-count-box">
+            <i class="fas fa-eye"></i> <span id="view-count-text">...</span>
+        </div>
+    </div>
+
+    <!-- Credit Vibecode ở góc phải -->
+    <div class="vibecode-credit">
+        <i class="fas fa-laptop-code"></i> Made with <span>Vibecode</span>
+    </div>
+
+    <script>
+        function enterSite() {
+            // Yêu cầu quyền Gyroscope (Gia tốc kế) trên iOS 13+ và bật cho Mobile
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Các thiết bị khác (Android, v.v.)
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+
+            // Ẩn màn hình chờ bằng hiệu ứng zoom + blur tan
+            document.getElementById('enter-screen').classList.add('fade-out');
+            setTimeout(() => {
+                document.getElementById('enter-screen').style.display = 'none';
+            }, 900);
+
+            // Phát background video và audio
+            const bgVideo = document.getElementById('bg-video');
+            const bgAudio = document.getElementById('bg-audio');
+            if (bgVideo && bgAudio) {
+                bgVideo.play().then(() => {
+                    // Bước 1: Video mượt mà hiện lên trước
+                    bgVideo.style.opacity = '1'; 
+                    
+                    // Bước 2: Chờ video hiện đủ sáng (khoảng 800ms) rồi nội dung mới từ từ bay lên
+                    setTimeout(() => {
+                        document.querySelector('.main-content').classList.add('visible');
+                        document.querySelector('.view-count').classList.add('visible');
+                        document.querySelector('.vibecode-credit').classList.add('visible');
+
+                        // Sau khi animation card bay lên xong (~2s), bật transition để co giãn mượt khi hover
+                        setTimeout(() => {
+                            document.querySelector('.main-content').style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                        }, 2000);
+                    }, 800); 
+                }).catch(e => {
+                    console.log("Video autoplay failed:", e);
+                    // Nếu lỗi video, vẫn ép hiển thị nội dung
+                    document.querySelector('.main-content').classList.add('visible');
+                    document.querySelector('.view-count').classList.add('visible');
+                    document.querySelector('.vibecode-credit').classList.add('visible');
+                });
+                
+                bgAudio.play().catch(e => console.log("Audio autoplay failed:", e));
+            }
+
+            // Kích hoạt hiệu ứng Hacker Scramble chữ Dinh Trong -> Cuway
+            const nameEl = document.getElementById('name-scramble');
+            if (nameEl) {
+                setTimeout(() => {
+                    scrambleText(nameEl, "Dinh Trong", "Cuway", 1500);
+                }, 2800); // Chờ card ổn định rồi mới đổi chữ
+            }
+
+
+            // Gọi API đếm lượt xem
+            fetch('https://api.counterapi.dev/v1/cuway_portfolio/visits/up')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('view-count-text').innerText = data.count.toLocaleString('vi-VN');
+                })
+                .catch(err => {
+                    document.getElementById('view-count-text').innerText = "1,000";
+                });
+
+            // Hiệu ứng gõ chữ (Typewriter) lặp lại hỗ trợ nhiều câu
+            const textArrayToType = [
+                "đêm đêm con thắp đèn trời",
+                "cầu cho cha mẹ đóng lời dùm con"
+            ];
+            let textArrayIndex = 0;
+            let currentText = [...textArrayToType[textArrayIndex]];
+            const typewriterElement = document.getElementById('typewriter-text');
+            let typeIndex = 0;
+            let isDeleting = false;
+
+            function typeWriter() {
+                let currentSpeed = isDeleting ? 30 : 100; // Tốc độ xóa cực nhanh và tốc độ gõ
+
+                if (!isDeleting && typeIndex <= currentText.length) {
+                    // Đang gõ
+                    typewriterElement.textContent = currentText.slice(0, typeIndex).join('');
+                    typeIndex++;
+                    if (typeIndex > currentText.length) {
+                        isDeleting = true;
+                        currentSpeed = 2000; // Dừng lại 2 giây khi gõ xong để đọc
+                    }
+                } else if (isDeleting && typeIndex >= 0) {
+                    // Đang xóa (Xóa nhanh dần)
+                    typewriterElement.textContent = currentText.slice(0, typeIndex).join('');
+                    typeIndex--;
+                    if (typeIndex === 0) {
+                        isDeleting = false;
+                        currentSpeed = 500; // Dừng lại 0.5 giây trước khi gõ câu tiếp theo
+                        
+                        // Chuyển sang câu tiếp theo
+                        textArrayIndex = (textArrayIndex + 1) % textArrayToType.length;
+                        currentText = [...textArrayToType[textArrayIndex]];
+                    }
+                }
+
+                setTimeout(typeWriter, currentSpeed);
+            }
+            
+            // Khởi động gõ chữ
+            setTimeout(typeWriter, 1000); // Chờ 1s cho chữ nổi lên xong mới bắt đầu gõ
+        }
+
+        // --- HIỆU ỨNG DI CHUỘT (Custom Cursor & 3D Tilt) ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const mainContent = document.querySelector('.main-content');
+
+        document.addEventListener('mouseenter', () => {
+            cursorDot.style.opacity = '1';
+        });
+
+        document.addEventListener('mouseleave', () => {
+            cursorDot.style.opacity = '0';
+        });
+
+        // --- HIỆU ỨNG ĐƯỜNG LINE CHẠY THEO CHUỘT (Canvas) ---
+        const canvas = document.createElement('canvas');
+        canvas.id = 'canvas-line';
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '5'; // Dưới nội dung, trên video
+
+        let points = [];
+
+
+        // Hiện lại con trỏ khi di chuyển vào trang web
+        document.addEventListener('mouseenter', () => {
+            cursorDot.style.display = 'block';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            // Cập nhật vị trí con trỏ chuột bằng Transform3D (Siêu mượt 120hz, không bị giật lag CSS)
+            cursorDot.style.transform = `translate3d(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%), 0)`;
+
+            if (points.length === 0 || Math.abs(e.clientX - points[points.length-1].x) > 3 || Math.abs(e.clientY - points[points.length-1].y) > 3) {
+                points.push({x: e.clientX, y: e.clientY, age: 0});
+                if (points.length > 40) points.shift();
+            }
+
+            // Hiệu ứng 3D Parallax cho bảng nội dung chính (Chỉ hoạt động trên PC)
+            if (mainContent.classList.contains('visible') && window.innerWidth > 768) {
+                let xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+                let yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                mainContent.style.transform = `perspective(1000px) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            }
+        });
+
+        // --- HIỆU ỨNG 3D PARALLAX BẰNG GYROSCOPE (Cho Mobile/iPhone) ---
+        function handleOrientation(event) {
+            if (!mainContent.classList.contains('visible') || window.innerWidth > 768) return;
+            if (event.gamma === null || event.beta === null) return; // Nếu máy không có Gyroscope
+            
+            let gamma = event.gamma; // Góc nghiêng trái/phải [-90, 90]
+            let beta = event.beta;   // Góc ngửa lên/xuống [-180, 180]
+
+            // Giới hạn góc nghiêng tối đa
+            if (gamma > 45) gamma = 45;
+            if (gamma < -45) gamma = -45;
+            
+            // Trừ đi góc cầm điện thoại tự nhiên (nghiêng khoảng 45 độ là góc 0 chuẩn)
+            let betaOffset = beta - 45; 
+            if (betaOffset > 45) betaOffset = 45;
+            if (betaOffset < -45) betaOffset = -45;
+
+            // Chuyển đổi ra trục X, Y cho CSS
+            let xAxis = gamma / 2; // Độ nhạy lắc trái/phải
+            let yAxis = -betaOffset / 2; // Độ nhạy ngửa lên/xuống
+            
+            mainContent.style.transform = `perspective(1000px) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        }
+
+
+        // Vòng lặp vẽ đường Line bám đuôi
+        function animateLine() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Tăng tuổi thọ của điểm để làm mờ dần
+            points.forEach(p => p.age += 1.5);
+            // Xóa các điểm đã quá cũ
+            points = points.filter(p => p.age < 30);
+            
+            if (points.length > 1) {
+            ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ffdae0';
+                
+                for (let i = 1; i < points.length; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(points[i-1].x, points[i-1].y);
+                    ctx.lineTo(points[i].x, points[i].y);
+                    // Giảm độ mờ (opacity) và độ dày nét vẽ ở phần đuôi
+                    let opacity = 1 - (points[i].age / 30);
+                    if(opacity < 0) opacity = 0;
+                    ctx.strokeStyle = `rgba(255, 218, 224, ${opacity})`;
+                    ctx.lineWidth = opacity * 6; // Độ dày max là 6px ở đầu
+                    ctx.stroke();
+                }
+            }
+            requestAnimationFrame(animateLine);
+        }
+        animateLine();
+
+        // --- HÀM SCRAMBLE TEXT (ĐỔI CHỮ HIỆU ỨNG HACKER) ---
+        function scrambleText(element, oldText, newText, duration) {
+            const chars = '!<>-_\\\\/[]{}—=+*^?#_@ABCDEFXYZ';
+            const startTime = Date.now();
+            let interval = setInterval(() => {
+                let elapsed = Date.now() - startTime;
+                let progress = elapsed / duration;
+                
+                if (progress >= 1) {
+                    element.innerText = newText;
+                    element.setAttribute('data-text', newText);
+                    clearInterval(interval);
+                    return;
+                }
+                
+                let result = "";
+                let maxLen = Math.max(oldText.length, newText.length);
+                for (let i = 0; i < maxLen; i++) {
+                    let threshold = i / maxLen; // Thời điểm chữ này "ổn định" thành chữ mới
+                    if (progress > threshold) {
+                        result += newText[i] || "";
+                    } else if (progress < threshold - 0.2) {
+                        result += oldText[i] || "";
+                    } else {
+                        // Đang trong giai đoạn nhễu loạn (Glitch)
+                        result += chars[Math.floor(Math.random() * chars.length)];
+                    }
+                }
+                element.innerText = result;
+                element.setAttribute('data-text', result);
+            }, 50); // Đổi ký tự mỗi 50ms
+        }
+    </script>
+</body>
+</html>
