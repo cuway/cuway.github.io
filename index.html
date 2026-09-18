@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuway</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="style.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Man hinh cho # -->
+    <div id="enter-screen" onclick="enterSite()">
+        <p>[ click to enter ]</p>
+    </div>
+
+    <!-- Background Video -->
+    <video id="bg-video" autoplay muted playsinline webkit-playsinline disablePictureInPicture style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -1; filter: brightness(0.6) blur(2px); pointer-events: none;">
+        <source src="palestine_video.mp4" type="video/mp4">
+    </video>
+
+    <audio id="bg-audio">
+        <source src="palestine_audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="main-content">
+
+
+        <h1 class="name"><span class="sway-wrapper glitch-text" id="name-scramble" data-text="Dinh Trong">Dinh Trong</span></h1>
+        
+        <div class="location">
+            <span>
+                <i class="fas fa-map-marker-alt"></i> Southeast Asia
+            </span>
+        </div>
+
+        <div class="socials">
+            <div class="discord-tag"><i class="fab fa-discord"></i> cuway98</div>
+        </div>
+
+        <div class="skills">
+            <div class="skill-badge"><i class="fab fa-python"></i> Python</div>
+            <div class="skill-badge"><i class="fas fa-code"></i> C</div>
+            <div class="skill-badge"><i class="fas fa-code"></i> C++</div>
+            <div class="skill-badge"><i class="fab fa-html5"></i> HTML</div>
+        </div>
+    </div>    <div class="vibecode-credit">
+        <i class="fas fa-laptop-code"></i> Made with <span>MyDick</span>
+    </div>
+
+    <!-- Ghost Cursor script from guns.lol -->
+    <script src="cursor_effects.js"></script>
+    <script src="script.js?v=5"></script>
+</body>
+</html>

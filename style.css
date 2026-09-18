@@ -1,0 +1,196 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+    overflow: hidden; 
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+    cursor: auto; /* Fallback, ghost cursor handles visuals */
+}
+
+/* Màn hình chờ */
+#enter-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000;
+    z-index: 9999;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#enter-screen.fade-out {
+    opacity: 0;
+    transform: scale(1.5);
+    filter: blur(10px);
+}
+
+#enter-screen p {
+    font-size: 1rem;
+    letter-spacing: 1px;
+    font-family: 'JetBrains Mono', monospace;
+    animation: blink 1.5s infinite;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+#bg-image {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: -1;
+    filter: brightness(0.4) blur(4px);
+    transition: opacity 1s ease;
+}
+
+/* Sharp, minimalist card */
+.main-content {
+    text-align: center;
+    z-index: 10;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.5s ease, filter 0.5s ease, transform 0.1s ease-out;
+    
+    position: relative;
+    padding: 30px 45px;
+    border-radius: 0px; /* Sharp corners */
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    width: 90%;
+    max-width: 400px;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 20px 25px;
+    }
+}
+
+.main-content.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@keyframes contentSlideUp {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+
+.main-content.visible .name { animation: contentSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+.main-content.visible .location { animation: contentSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+.main-content.visible .socials { animation: contentSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+.main-content.visible .skills { animation: contentSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both; }
+.main-content.visible .volume-control { animation: contentSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both; }
+
+.name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.8rem;
+    font-weight: 400; 
+    margin-bottom: 0;
+    color: #fff;
+    text-shadow: 0px 0px 16.5px #ffffff;
+}
+
+/* Glitch text */
+.glitch-text { position: relative; display: inline-block; }
+.glitch-text::before, .glitch-text::after {
+    content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; pointer-events: none; opacity: 0.8;
+}
+.glitch-text::before {
+    left: 2px; text-shadow: -1px 0 #00f0ff; clip-path: inset(10% 0 80% 0); animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+.glitch-text::after {
+    left: -2px; text-shadow: 1px 0 #ff4655; clip-path: inset(80% 0 10% 0); animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+@keyframes glitch-anim {
+    0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+    20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+    40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+    60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+    80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
+    100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+}
+@keyframes glitch-anim-2 {
+    0% { clip-path: inset(10% 0 60% 0); transform: translate(2px, -1px); }
+    20% { clip-path: inset(30% 0 20% 0); transform: translate(-2px, 1px); }
+    40% { clip-path: inset(70% 0 10% 0); transform: translate(2px, -2px); }
+    60% { clip-path: inset(20% 0 50% 0); transform: translate(-2px, 2px); }
+    80% { clip-path: inset(50% 0 30% 0); transform: translate(1px, -1px); }
+    100% { clip-path: inset(5% 0 80% 0); transform: translate(-1px, 1px); }
+}
+
+.bio {
+    font-size: 1rem;
+    color: #ccc;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.location {
+    margin-top: 20px;
+    margin-bottom: 25px;
+}
+
+.location span {
+    color: #aaa;
+    font-size: 0.9rem;
+    font-weight: 300;
+    font-style: italic;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin: 0;
+}
+
+.socials { display: flex; justify-content: center; margin-bottom: 20px; }
+.discord-tag {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+.skills {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.skill-badge {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.04);
+    padding: 6px 14px;
+    border-radius: 0px; /* Sharp */
+    font-size: 0.85rem;
+    color: #fff;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.3s ease;
+}
+.skill-badge:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.cursor-blink { animation: blink 1s step-start infinite; }
+
+.vibecode-credit {
+    position: fixed; bottom: 20px; right: 20px;
+    font-size: 0.75rem; color: rgba(255,255,255,0.4);
+    opacity: 0; transition: opacity 1s ease;
+}
+.vibecode-credit.visible { opacity: 1; }
+
+
